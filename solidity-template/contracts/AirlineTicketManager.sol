@@ -2,7 +2,9 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+//factory contract
 contract AirlineTicketManagerFactory {
+    //modifier
     address owner;
 
     modifier Owner {
@@ -12,6 +14,8 @@ contract AirlineTicketManagerFactory {
     constructor() {
         owner = msg.sender;
     }
+    
+    //factory function
     AirlineTicketManager[] factoryObjects;
     function newAirlineTicketManager () public Owner{
         AirlineTicketManager ATM = new AirlineTicketManager();
@@ -21,6 +25,8 @@ contract AirlineTicketManagerFactory {
 }
 
 contract AirlineTicketManager {
+
+    //task 1 structs and mapping
     
     struct reservation {
         address passportId;
@@ -30,12 +36,14 @@ contract AirlineTicketManager {
     }
 
     uint256 reservationsCount = 0;
-    mapping (uint => reservation) public reservations;
+    mapping (uint => reservation) public reservations; //uint represents reservation id same user can make multiple reservations
     
+    //task 2 enums
     enum Class{FIRST_CLASS, BUSINESS, ECONOMY }
 
     Class choice = Class.ECONOMY;
 
+    //functions to let user choose class, choice is updated in choice variable
     function setFirstClass() public {
         choice = Class.FIRST_CLASS;
     }
@@ -59,12 +67,15 @@ contract AirlineTicketManager {
     //     choice = _choice;
     // }
 
+    //task 3 set price
     uint Economy_price = 0.005 ether;
     uint Business_price = 0.007 ether;
     uint FirstClass_price = 0.01 ether;
 
+    //task 4 payments
     event Received(address, uint);
 
+    //method receives ether and sends the extra ether back
     function pay() internal {
         uint moneyToReturn;
         if(reservations[reservationsCount].choice == Class.FIRST_CLASS) {
@@ -84,6 +95,7 @@ contract AirlineTicketManager {
                 payable(msg.sender).transfer(moneyToReturn);
     }
 
+    //main function: sets user address as passportid chosen choice, and inputs _name and _destination
     function makeReservation (string memory _name, string memory _destination) public payable{
         reservationsCount += 1;
         reservations[reservationsCount] = reservation(msg.sender, _name, _destination, choice);
@@ -91,6 +103,7 @@ contract AirlineTicketManager {
     }
 
     /*------------------------------------------------------------*/
+    //task 5
     address owner;
 
     modifier Owner {
@@ -102,7 +115,7 @@ contract AirlineTicketManager {
         owner = msg.sender;
     }
 
-    mapping (address => bool) private isAllowed;
+    mapping (address => bool) private isAllowed; //if an address is true its whitelisted.
 
     function addUser(address _user) public Owner{
         isAllowed[_user] = true;
